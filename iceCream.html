@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ice Cream Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1>Ice Cream Generator</h1>
+<div id="buttonContainer">
+  <button onclick="generateIceCream()">Generate Ice Cream</button>
+  <div id="dropdownContainer"></div>
+</div>
+<p id="iceCreamSentence"></p>
+<div id="container">
+  <div id="calorieContainer"></div>
+</div>
+
+<script>
+  //Database of possible flavors, toppings, and containers
+  const flavorData = [
+    { name: "vanilla", calories: 150 },
+    { name: "chocolate", calories: 200 },
+    { name: "strawberry", calories: 180 },
+    { name: "mint-chip", calories: 220 },
+    { name: "cookie-dough", calories: 250 },
+  ];
+
+  const toppingData = [
+    { name: "sprinkles", calories: 30 },
+    { name: "whipped-cream", calories: 50 },
+    { name: "nuts", calories: 70 },
+    { name: "chocolate-sauce", calories: 60 },
+    { name: "caramel-drizzle", calories: 80 },
+  ];
+
+  const containerData = [
+    { name: "waffle-cone", calories: 120 },
+    { name: "cup", calories: 0 },
+    { name: "sugar-cone", calories: 110 },
+    { name: "dish", calories: 0 },
+    { name: "waffle-bowl", calories: 150 },
+  ];
+
+  //Complete randomization of ice cream features
+  function generateIceCream() {
+    const flavor = getRandomItems(flavorData);
+    const topping = getRandomItems(toppingData);
+    const container = getRandomItems(containerData);
+
+    const sentence = `You should get a ${flavor.name} ice cream with ${topping.name} on top and have it in a ${container.name}`;
+
+    document.getElementById("iceCreamSentence").textContent = sentence;
+    displayCalories([{ name: topping.name, calories: topping.calories }, { name: flavor.name, calories: flavor.calories }, { name: container.name, calories: container.calories }]);
+    displayDropdown();
+  }
+
+  function displayDropdown() {
+    const dropdownContainer = document.getElementById("dropdownContainer");
+    dropdownContainer.innerHTML = "";
+
+    const dropdown = document.createElement("select");
+    dropdown.id = "iceCreamOptions";
+
+    dropdown.options.add(new Option("Select an option to switch out!", "Select an option to switch out!"));
+    dropdown.options.add(new Option("Switch Toppings", "Switch Toppings"));
+    dropdown.options.add(new Option("Switch Flavor", "Switch Flavor"));
+    dropdown.options.add(new Option("Switch Container", "Switch Container"));
+
+    dropdown.addEventListener("change", function() {
+      handleDropdownSelection(dropdown);
+    });
+
+    dropdownContainer.appendChild(dropdown);
+  }
+
+  //Dropdown for individual selection
+  function handleDropdownSelection(dropdown) {
+    const selectedOption = dropdown.value;
+    
+    switch (selectedOption) {
+      case "Switch Toppings":
+        switchToppings();
+        break;
+      case "Switch Flavor":
+        switchFlavor();
+        break;
+      case "Switch Container":
+        switchContainer();
+        break;
+      default:
+        break;
+    }
+
+    dropdown.value = "Select an option to switch out!";
+  }
+
+  //Calorie logic and display
+  function displayCalories(items) {
+    const calorieContainer = document.getElementById("calorieContainer");
+    calorieContainer.innerHTML = "";
+  
+    let totalCalories = 0;
+  
+    items.forEach(item => {
+      const caloriePair = document.createElement("div");
+      caloriePair.className = "caloriePair";
+  
+      const image = document.createElement("img");
+      image.src = `images/${item.name}.jpeg`;
+      image.alt = item.name;
+      caloriePair.appendChild(image);
+  
+      const calorieText = document.createElement("span");
+      calorieText.textContent = `${item.calories} calories  `;
+      caloriePair.appendChild(calorieText);
+      calorieContainer.appendChild(caloriePair);
+  
+      totalCalories += item.calories;
+    });
+  
+    const totalCaloriesText = document.createElement("p");
+    totalCaloriesText.textContent = `Total Calories: ${totalCalories} calories`;
+    totalCaloriesText.className = "totalCalories"; // Add a class
+    calorieContainer.appendChild(totalCaloriesText);
+  }
+
+  //randomize multiple items
+  function getRandomItems(dataArray) {
+    return dataArray[Math.floor(Math.random() * dataArray.length)];
+  }
+
+  //randomize single item
+  function getRandomItem(dataArray, current) {
+    let newItem;
+    do {
+        newItem = dataArray[Math.floor(Math.random() * dataArray.length)];
+    } while (newItem.name === current);
+
+    return newItem;
+}
+
+//Logic to switch out just toppings
+function generateToppings() {
+    const existingFlavor = document.getElementById("iceCreamSentence").textContent.split(" ")[4];
+    const existingTopping = document.getElementById("iceCreamSentence").textContent.split(" ")[8];
+    const existingContainer = document.getElementById("iceCreamSentence").textContent.split(" ")[16].trim();
+    const flavorItem = flavorData.find(item => item.name === existingFlavor);
+    const containerItem = containerData.find(item => item.name === existingContainer);
+    const toppingItem = toppingData.find(item => item.name === existingTopping)
+
+    const newTopping = getRandomItem(toppingData, toppingItem.name);
+
+    const sentence = `You should get a ${flavorItem.name} ice cream with ${newTopping.name} on top and have it in a ${containerItem.name}`;
+
+    document.getElementById("iceCreamSentence").textContent = sentence;
+    displayCalories([{ name: newTopping.name, calories: newTopping.calories }, { name: flavorItem.name, calories: flavorItem.calories }, { name: containerItem.name, calories: containerItem.calories }]);
+}
+
+//Logic to switch out just flavors
+function generateFlavors() {
+    const existingFlavor = document.getElementById("iceCreamSentence").textContent.split(" ")[4];
+    const existingTopping = document.getElementById("iceCreamSentence").textContent.split(" ")[8];
+    const existingContainer = document.getElementById("iceCreamSentence").textContent.split(" ")[16].trim();
+    const flavorItem = flavorData.find(item => item.name === existingFlavor);
+    const containerItem = containerData.find(item => item.name === existingContainer);
+    const toppingItem = toppingData.find(item => item.name === existingTopping)
+
+    const newFlavor = getRandomItem(flavorData, flavorItem.name);
+
+    const sentence = `You should get a ${newFlavor.name} ice cream with ${toppingItem.name} on top and have it in a ${containerItem.name}`;
+
+    document.getElementById("iceCreamSentence").textContent = sentence;
+    displayCalories([{ name: toppingItem.name, calories: toppingItem.calories }, { name: newFlavor.name, calories: newFlavor.calories }, { name: containerItem.name, calories: containerItem.calories }]);
+}
+
+//Logic to switch out just containers
+function generateContainers() {
+    const existingFlavor = document.getElementById("iceCreamSentence").textContent.split(" ")[4];
+    const existingTopping = document.getElementById("iceCreamSentence").textContent.split(" ")[8];
+    const existingContainer = document.getElementById("iceCreamSentence").textContent.split(" ")[16].trim();
+    const flavorItem = flavorData.find(item => item.name === existingFlavor);
+    const containerItem = containerData.find(item => item.name === existingContainer);
+    const toppingItem = toppingData.find(item => item.name === existingTopping)
+
+    const newContainer = getRandomItem(containerData, name);
+
+    const sentence = `You should get a ${flavorItem.name} ice cream with ${toppingItem.name} on top and have it in a ${newContainer.name}`;
+
+    document.getElementById("iceCreamSentence").textContent = sentence;
+    displayCalories([{ name: toppingItem.name, calories: toppingItem.calories }, { name: flavorItem.name, calories: flavorItem.calories }, { name: newContainer.name, calories: newContainer.calories }]);
+}
+
+function switchToppings() {
+    generateToppings();
+}
+
+function switchFlavor() {
+  generateFlavors();
+}
+
+function switchContainer() {
+  generateContainers();
+}
+</script>
+
+</body>
+</html>
